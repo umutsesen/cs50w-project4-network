@@ -1,0 +1,126 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+<div class="container" id="post-view">
+   <div id='middle' class="container">
+      {% if x != "x" %}
+      {% if user.is_authenticated %}
+      <div id='createpost' class="container" style="width: 70%;">
+         <form method="POST">
+            {% csrf_token %}
+            {{ PostForm.Content }}
+            <input type='submit' style="margin-top: 1em" value="Create Post" class="btn btn-success" id='post' class="btn btn-primary">
+         </form>
+         <span>
+         {% endif %}
+         {% else %}
+         {% if "user" in request.path %}
+         Followers:
+         {% for follow in Followers %}
+         {{ follow.Follower}}
+         {% endfor %}
+         {{ FollowerNum }}
+         Following:
+         {% for follow in Following %}
+         {{ follow.Following }}
+         {% endfor %}
+         {{ FollowingNum }}
+      </span>
+         {% if CurrentUser != ProfileOwner %}
+         <form method="POST">
+            {% csrf_token %}
+            {% if CurrentUser.id not in l %}
+            <input type='submit' class="btn btn-success" value="Follow">
+            {% else %}
+            <input type='submit' class="btn btn-success" id="UnFollow" value="Unfollow">
+            {% endif %}
+            {% endif %}
+            {% if messages %}
+            <ul class="messages">
+               {% for message in messages %}
+               <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+               {% endfor %}
+            </ul>
+            {% endif %}
+         </form>
+         {% endif %} 
+         {% endif %}  
+      </div>
+      <div id='posts' class="container" style="width: 75%;">
+         {% for post in page_obj %}{% for like in likecount %}
+         {% if forloop.counter == forloop.parentloop.counter %}
+         <div class="container">
+            <div class="container postContent" >
+               <div style='display: inline-block; width: 70%;'><a id="link" href="/user/{{ post.User.pk }}" >User: {{ post.User.pk }}</a></div>
+               <div id="date" style="padding-top: 0.5em; display: inline-block;">
+                  <span>Date: {{ post.Date }}</span>
+                  {% if post.pk in UserPost %}
+                  <form>
+                     <input type='submit' data-id='{{ post.pk }}' style="float: right;" class="btn btn-success" value="Edit Post" onClick="return EditPost(this.dataset.id)"></input>
+                  </form>
+                  {% endif %}
+               </div>
+                  <div class='postinside' id='{{ post.pk }}' style='text-align:center;'>
+                     <div id='{{ post.pk }}text'><span>{{ post.Content }}</span></div>
+                     <br>
+                     <div>
+                        
+                        <span id='like{{ post.pk }}'> Liked: {{ like }} </span>
+                        <br>
+                        {% if user.is_authenticated %}
+                        <button type='button' class="btn btn-success" data-id='{{ post.pk }}' data-userid="{{ CurrentUser.pk }}" id='{{ post.pk }}Like' onClick="return Like(this.dataset.id, this.dataset.userid);">Like</button>
+                        {% endif %}
+                        <br>
+                        <br>
+                     </div>
+                  </div>
+
+               
+            </div>
+         </div>
+         {% endif %}
+         {% endfor %}{% endfor %}
+         <div class="pagination" style="margin-top: 1em;">
+            <nav style="width: 100%;">
+            <ul class="pagination justify-content-end">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% else %}
+            <li class="page-item disabled">
+               <li class="page-item"><a class="page-link" tabindex="-1" aria-disabled="true">&laquo; First</a></li>
+               <li class="page-item"><a class="page-link" tabindex="-1" aria-disabled="true" >Previous</a></li>
+            </li>
+            {% endif %}
+         
+               {% for x in rangex %}
+               {% if x == page_obj.number %}
+               <li class="page-item active" aria-current="page">  
+                  <a class="page-link" href="?page={{ x }}">{{ x }}<span class="sr-only">(current)</span></a>
+               
+               </li>
+               {% else %}
+               <li class="page-item"><a class="page-link" href="?page={{ x }}">{{ x }}</a></li>
+               {% endif %}
+               {% endfor %}
+        
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+            {% else %}
+            <li class="page-item disabled">
+               <li class="page-item"><a class="page-link" tabindex="-1" aria-disabled="true">Next</a></li>
+               <li class="page-item"><a class="page-link" tabindex="-1" aria-disabled="true" >Last &raquo;</a></li>
+            </li>
+            {% endif %}
+         </ul>
+      </nav>
+         </div>
+      </div>
+   </div>
+</div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{% static 'network/network.js' %}"></script>
+{% endblock %}
